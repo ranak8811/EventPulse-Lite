@@ -4,6 +4,7 @@ import {
   EventCategory,
   EventStatus,
 } from './interfaces/event.interface.js';
+import { CreateEventDto } from './dto/create-event.dto.js';
 
 @Injectable()
 export class EventsService {
@@ -65,6 +66,8 @@ export class EventsService {
     },
   ];
 
+  private nextEventId = this.events.length + 1;
+
   findAllEvents() {
     return this.events;
   }
@@ -75,6 +78,23 @@ export class EventsService {
     if (!event) {
       throw new NotFoundException(`Event with id ${id} not found`);
     }
+
+    return event;
+  }
+
+  createEvent(createEventDto: CreateEventDto) {
+    const event: Event = {
+      id: this.nextEventId++,
+      title: createEventDto.title,
+      description: createEventDto.description,
+      category: createEventDto.category,
+      totalSeats: createEventDto.totalSeats,
+      bookedSeats: 0,
+      status: EventStatus.UPCOMING,
+      createdAt: new Date(),
+    };
+
+    this.events.push(event);
 
     return event;
   }
