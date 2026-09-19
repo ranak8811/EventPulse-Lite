@@ -1,14 +1,14 @@
-enum EventCategory {
-  TECH,
-  BUSINESS,
-  WORKSHOP,
-  MUSIC,
+export enum EventCategory {
+  TECH = 'TECH',
+  BUSINESS = 'BUSINESS',
+  WORKSHOP = 'WORKSHOP',
+  MUSIC = 'MUSIC',
 }
 
-enum EventStatus {
-  UPCOMING,
-  COMPLETED,
-  CANCELLED,
+export enum EventStatus {
+  UPCOMING = 'UPCOMING',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
 }
 
 export interface Event {
