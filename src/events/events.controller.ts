@@ -7,10 +7,12 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { EventsService } from './events.service.js';
 import { CreateEventDto } from './dto/create-event.dto.js';
 import { FilterEventsQueryDto } from './dto/filter-events-query.dto.js';
+import { AdminGuard } from '../common/guards/admin.guard.js';
 
 @Controller('events')
 export class EventsController {
@@ -37,6 +39,7 @@ export class EventsController {
   }
 
   @Patch(':id/cancel')
+  @UseGuards(AdminGuard)
   cancelEvent(@Param('id', ParseIntPipe) id: number) {
     return this.eventsService.cancelEvent(id);
   }
