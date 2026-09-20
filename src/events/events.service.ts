@@ -4,90 +4,31 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
-  Event,
-  EventCategory,
   EventStatus,
 } from './interfaces/event.interface.js';
 import { CreateEventDto } from './dto/create-event.dto.js';
 import { FilterEventsQueryDto } from './dto/filter-events-query.dto.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
 export class EventsService {
-  private events: Event[] = [
-    {
-      id: 1,
-      title: 'NestJS Architecture Summit 2026',
-      description:
-        'A deep dive into modular architecture, microservices, and clean code with NestJS.',
-      category: EventCategory.TECH,
-      totalSeats: 100,
-      bookedSeats: 25,
-      status: EventStatus.UPCOMING,
-      createdAt: new Date('2026-01-15T09:00:00.000Z'),
-    },
-    {
-      id: 2,
-      title: 'Startup Founders Pitch & Network',
-      description:
-        'Connect with venture capitalists and pitch your innovative business ideas.',
-      category: EventCategory.BUSINESS,
-      totalSeats: 50,
-      bookedSeats: 50,
-      status: EventStatus.UPCOMING,
-      createdAt: new Date('2026-02-01T10:30:00.000Z'),
-    },
-    {
-      id: 3,
-      title: 'TypeScript Advanced Types Workshop',
-      description:
-        'Hands-on practical workshop mastering generics, template literal types, and type gymnastics.',
-      category: EventCategory.WORKSHOP,
-      totalSeats: 30,
-      bookedSeats: 12,
-      status: EventStatus.UPCOMING,
-      createdAt: new Date('2026-02-20T14:00:00.000Z'),
-    },
-    {
-      id: 4,
-      title: 'Open Air Acoustic Music Festival',
-      description:
-        'An evening celebrating indie artists and acoustic melodies under the night sky.',
-      category: EventCategory.MUSIC,
-      totalSeats: 200,
-      bookedSeats: 200,
-      status: EventStatus.COMPLETED,
-      createdAt: new Date('2026-03-05T18:00:00.000Z'),
-    },
-    {
-      id: 5,
-      title: 'Cloud Native & DevOps Bootcamp',
-      description:
-        'Intensive training on Kubernetes, Docker, and CI/CD automation pipelines.',
-      category: EventCategory.TECH,
-      totalSeats: 80,
-      bookedSeats: 15,
-      status: EventStatus.CANCELLED,
-      createdAt: new Date('2026-03-10T11:00:00.000Z'),
-    },
-  ];
+  constructor(private readonly prisma: PrismaService) {}
 
-  private nextEventId = this.events.length + 1;
-
-  findAllEvents(query?: FilterEventsQueryDto) {
-    let events = [...this.events];
+  async findAllEvents(query?: FilterEventsQueryDto) {
+    let collection = this.prisma.event;
 
     if (query?.category) {
-      events = events.filter((event) => event.category === query.category);
+      collection = collection.where({ category: query.category });
     }
     if (query?.status) {
-      events = events.filter((event) => event.status === query.status);
+      collection = collection.where({ status: query.status });
     }
 
-    return events;
+    return await collection.orderBy((e) => e.createdAt.desc()).all();
   }
 
-  findOneEvent(id: number) {
-    const event = this.events.find((event) => event.id === id);
+  async findOneEvent(id: string) {
+    const event = await this.prisma.event.first({ id });
 
     if (!event) {
       throw new NotFoundException(`Event with id ${id} not found`);
@@ -96,31 +37,17 @@ export class EventsService {
     return event;
   }
 
-  createEvent(createEventDto: CreateEventDto) {
-    const event: Event = {
-      id: this.nextEventId++,
+  async createEvent(createEventDto: CreateEventDto) {
+    return await this.prisma.event.create({
       title: createEventDto.title,
       description: createEventDto.description,
       category: createEventDto.category,
       totalSeats: createEventDto.totalSeats,
-      bookedSeats: 0,
-      status: EventStatus.UPCOMING,
-      createdAt: new Date(),
-    };
-
-    this.events.push(event);
-
-    return event;
+    });
   }
 
-  bookSeat(id: number): Event {
-    const eventIndex = this.events.findIndex((event) => event.id === id);
-
-    if (eventIndex === -1) {
-      throw new NotFoundException(`Event with id ${id} not found`);
-    }
-
-    const event = this.events[eventIndex];
+  async bookSeat(id: string) {
+    const event = await this.findOneEvent(id);
 
     if (event.status === EventStatus.CANCELLED) {
       throw new BadRequestException('Cannot book seats for a cancelled event');
@@ -134,24 +61,15 @@ export class EventsService {
       throw new BadRequestException('Event is fully booked');
     }
 
-    const updatedEvent: Event = {
-      ...event,
-      bookedSeats: event.bookedSeats + 1,
-    };
-
-    this.events[eventIndex] = updatedEvent;
-
-    return updatedEvent;
+    return await this.prisma.event
+      .where({ id })
+      .update({
+        bookedSeats: event.bookedSeats + 1,
+      });
   }
 
-  cancelEvent(id: number): Event {
-    const eventIndex = this.events.findIndex((event) => event.id === id);
-
-    if (eventIndex === -1) {
-      throw new NotFoundException(`Event with id ${id} not found`);
-    }
-
-    const event = this.events[eventIndex];
+  async cancelEvent(id: string) {
+    const event = await this.findOneEvent(id);
 
     if (
       event.status === EventStatus.CANCELLED ||
@@ -160,13 +78,10 @@ export class EventsService {
       throw new BadRequestException('Event is already cancelled or completed');
     }
 
-    const cancelledEvent: Event = {
-      ...event,
-      status: EventStatus.CANCELLED,
-    };
-
-    this.events[eventIndex] = cancelledEvent;
-
-    return cancelledEvent;
+    return await this.prisma.event
+      .where({ id })
+      .update({
+        status: EventStatus.CANCELLED,
+      });
   }
 }

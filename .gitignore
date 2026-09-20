@@ -64,3 +64,5 @@ diy-project
 troubleshooting
 
 feature-implementation
+node_modules/
+dist/

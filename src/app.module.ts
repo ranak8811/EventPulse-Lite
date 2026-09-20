@@ -5,9 +5,10 @@ import { AppService } from './app.service.js';
 import { EventsModule } from './events/events.module.js';
 import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware.js';
 import { EventsController } from './events/events.controller.js';
+import { PrismaModule } from './prisma/prisma.module.js';
 
 @Module({
-  imports: [EventsModule],
+  imports: [EventsModule, PrismaModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -1,0 +1,25 @@
+// use prisma-8
+enum EventCategory {
+  TECH
+  BUSINESS
+  WORKSHOP
+  MUSIC
+}
+
+enum EventStatus {
+  UPCOMING
+  COMPLETED
+  CANCELLED
+}
+
+model Event {
+  id          String                     @id @default(uuid(7))
+  title       String
+  description String
+  category    EventCategory
+  totalSeats  Int
+  bookedSeats Int                        @default(0)
+  status      EventStatus                @default(UPCOMING)
+  createdAt   TimestamptzString          @default(now())
+  updatedAt   temporal.updatedAtString()
+}

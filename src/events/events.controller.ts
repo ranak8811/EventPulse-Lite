@@ -3,7 +3,7 @@ import {
   Controller,
   Get,
   Param,
-  ParseIntPipe,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -24,7 +24,7 @@ export class EventsController {
   }
 
   @Get(':id')
-  findOneEvent(@Param('id', ParseIntPipe) id: number) {
+  findOneEvent(@Param('id', ParseUUIDPipe) id: string) {
     return this.eventsService.findOneEvent(id);
   }
 
@@ -34,13 +34,13 @@ export class EventsController {
   }
 
   @Patch(':id/book')
-  bookSeat(@Param('id', ParseIntPipe) id: number) {
+  bookSeat(@Param('id', ParseUUIDPipe) id: string) {
     return this.eventsService.bookSeat(id);
   }
 
   @Patch(':id/cancel')
   @UseGuards(AdminGuard)
-  cancelEvent(@Param('id', ParseIntPipe) id: number) {
+  cancelEvent(@Param('id', ParseUUIDPipe) id: string) {
     return this.eventsService.cancelEvent(id);
   }
 }

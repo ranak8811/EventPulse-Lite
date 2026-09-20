@@ -12,12 +12,13 @@ export enum EventStatus {
 }
 
 export interface Event {
-  id: number;
+  id: string;
   title: string;
   description: string;
   category: EventCategory;
   totalSeats: number;
   bookedSeats: number;
   status: EventStatus;
-  createdAt: Date;
+  createdAt: string;
+  updatedAt?: string;
 }
