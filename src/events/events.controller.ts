@@ -5,17 +5,19 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
 } from '@nestjs/common';
 import { EventsService } from './events.service.js';
 import { CreateEventDto } from './dto/create-event.dto.js';
+import { FilterEventsQueryDto } from './dto/filter-events-query.dto.js';
 
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Get()
-  findAllEvents() {
-    return this.eventsService.findAllEvents();
+  findAllEvents(@Query() query: FilterEventsQueryDto) {
+    return this.eventsService.findAllEvents(query);
   }
 
   @Get(':id')

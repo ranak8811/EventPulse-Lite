@@ -5,6 +5,7 @@ import {
   EventStatus,
 } from './interfaces/event.interface.js';
 import { CreateEventDto } from './dto/create-event.dto.js';
+import { FilterEventsQueryDto } from './dto/filter-events-query.dto.js';
 
 @Injectable()
 export class EventsService {
@@ -68,8 +69,17 @@ export class EventsService {
 
   private nextEventId = this.events.length + 1;
 
-  findAllEvents() {
-    return this.events;
+  findAllEvents(query?: FilterEventsQueryDto) {
+    let events = [...this.events];
+
+    if (query?.category) {
+      events = events.filter((event) => event.category === query.category);
+    }
+    if (query?.status) {
+      events = events.filter((event) => event.status === query.status);
+    }
+
+    return events;
   }
 
   findOneEvent(id: number) {
