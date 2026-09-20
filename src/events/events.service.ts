@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   Event,
   EventCategory,
@@ -107,5 +111,36 @@ export class EventsService {
     this.events.push(event);
 
     return event;
+  }
+
+  bookSeat(id: number): Event {
+    const eventIndex = this.events.findIndex((event) => event.id === id);
+
+    if (eventIndex === -1) {
+      throw new NotFoundException(`Event with id ${id} not found`);
+    }
+
+    const event = this.events[eventIndex];
+
+    if (event.status === EventStatus.CANCELLED) {
+      throw new BadRequestException('Cannot book seats for a cancelled event');
+    }
+
+    if (event.status === EventStatus.COMPLETED) {
+      throw new BadRequestException('Cannot book seats for a completed event');
+    }
+
+    if (event.bookedSeats >= event.totalSeats) {
+      throw new BadRequestException('Event is fully booked');
+    }
+
+    const updatedEvent: Event = {
+      ...event,
+      bookedSeats: event.bookedSeats + 1,
+    };
+
+    this.events[eventIndex] = updatedEvent;
+
+    return updatedEvent;
   }
 }

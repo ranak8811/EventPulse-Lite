@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -28,5 +29,10 @@ export class EventsController {
   @Post()
   createEvent(@Body() createEventDto: CreateEventDto) {
     return this.eventsService.createEvent(createEventDto);
+  }
+
+  @Patch(':id/book')
+  bookSeat(@Param('id', ParseIntPipe) id: number) {
+    return this.eventsService.bookSeat(id);
   }
 }
