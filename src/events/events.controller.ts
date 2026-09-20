@@ -35,4 +35,9 @@ export class EventsController {
   bookSeat(@Param('id', ParseIntPipe) id: number) {
     return this.eventsService.bookSeat(id);
   }
+
+  @Patch(':id/cancel')
+  cancelEvent(@Param('id', ParseIntPipe) id: number) {
+    return this.eventsService.cancelEvent(id);
+  }
 }

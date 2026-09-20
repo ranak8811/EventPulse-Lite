@@ -143,4 +143,30 @@ export class EventsService {
 
     return updatedEvent;
   }
+
+  cancelEvent(id: number): Event {
+    const eventIndex = this.events.findIndex((event) => event.id === id);
+
+    if (eventIndex === -1) {
+      throw new NotFoundException(`Event with id ${id} not found`);
+    }
+
+    const event = this.events[eventIndex];
+
+    if (
+      event.status === EventStatus.CANCELLED ||
+      event.status === EventStatus.COMPLETED
+    ) {
+      throw new BadRequestException('Event is already cancelled or completed');
+    }
+
+    const cancelledEvent: Event = {
+      ...event,
+      status: EventStatus.CANCELLED,
+    };
+
+    this.events[eventIndex] = cancelledEvent;
+
+    return cancelledEvent;
+  }
 }
